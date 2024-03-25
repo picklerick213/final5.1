@@ -58,12 +58,4 @@ export async function isAdmin() {
 }
 
 // Next.js API route handler
-export default async function handler(req, res) {
-  try {
-    // Handle your NextAuth logic here
-    const result = await NextAuth(req, res, authOptions);
-    res.status(200).json(result);
-  } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
-  }
-}
+export default handler;
