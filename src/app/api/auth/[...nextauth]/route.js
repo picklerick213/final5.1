@@ -1,3 +1,5 @@
+// src/app/api/auth/[...nextauth]/route.js
+
 import clientPromise from "@/libs/mongoConnect";
 import { UserInfo } from "@/models/UserInfo";
 import bcrypt from "bcrypt";
@@ -55,7 +57,7 @@ export async function isAdmin(req) {
     return false;
   }
   return userInfo.admin;
-
+}
 
 // Default export for Next.js API route handler
 export NextAuth(authOptions);
