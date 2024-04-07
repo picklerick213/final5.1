@@ -1,18 +1,15 @@
-// src/app/api/auth/[...nextauth]/route.js
-
-import clientPromise from "@/libs/mongoConnect";
-import { UserInfo } from "@/models/UserInfo";
+import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import * as mongoose from "mongoose";
-import { User } from "@/models/User";
 import NextAuth, { getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
+import { User } from "@/models/User";
+import { UserInfo } from "@/models/UserInfo";
 
-export const authOptions = {
+const authOptions = {
   secret: process.env.SECRET,
-  adapter: MongoDBAdapter(clientPromise),
+  adapter: MongoDBAdapter(mongoose.connection.getClient()),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -22,45 +19,50 @@ export const authOptions = {
       name: "Credentials",
       id: "credentials",
       credentials: {
-        username: { label: "Email", type: "email", placeholder: "test@example.com" },
+        email: { label: "Email", type: "email", placeholder: "test@example.com" },
         password: { label: "Password", type: "password", placeholder: "password" },
       },
       async authorize(credentials, req) {
-        const email = credentials?.email;
-        const password = credentials?.password;
+        const { email, password } = credentials;
 
-        // Connect to MongoDB within the authorize function for better resource management
-        await mongoose.connect(process.env.MONGO_URL);
+        try {
+          await mongoose.connect(process.env.MONGO_URL);
 
-        const user = await User.findOne({ email });
-        const passwordOk = user && bcrypt.compareSync(password, user.password);
+          const user = await User.findOne({ email });
+          if (!user) {
+            throw new Error("User not found");
+          }
 
-        if (passwordOk) {
+          const passwordOk = await bcrypt.compare(password, user.password);
+          if (!passwordOk) {
+            throw new Error("Invalid password");
+          }
+
           return user;
+        } catch (error) {
+          console.error("Error during authentication:", error);
+          return null;
         }
-
-        return null;
       },
     }),
   ],
 };
 
-// Utility function to check admin status (not directly exported as a route)
-export async function isAdmin(req) {
+export const isAdmin = async (req) => {
   const session = await getServerSession(authOptions, req);
   const userEmail = session?.user?.email;
+
   if (!userEmail) {
     return false;
   }
-  const userInfo = await UserInfo.findOne({ email: userEmail });
-  if (!userInfo) {
+
+  try {
+    const userInfo = await UserInfo.findOne({ email: userEmail });
+    return userInfo ? userInfo.admin : false;
+  } catch (error) {
+    console.error("Error while checking admin status:", error);
     return false;
   }
-  return userInfo.admin;
-}
+};
 
-
-
-// Default export for Next.js API route handler
 export default NextAuth(authOptions);
-
