@@ -1,15 +1,16 @@
-import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import NextAuth, { getServerSession } from "next-auth";
+import * as mongoose from "mongoose";
+import { User } from "@/models/User";
+import NextAuth from "next-auth"; // Removed "getServerSession" import
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
-import { User } from "@/models/User";
-import { UserInfo } from "@/models/UserInfo";
+import clientPromise from "@/libs/mongoConnect";
+import { UserInfo } from "../../../../models/UserInfo";
 
-const authOptions = {
+export const authOptions = {
   secret: process.env.SECRET,
-  adapter: MongoDBAdapter(mongoose.connection.getClient()),
+  adapter: MongoDBAdapter(clientPromise),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -19,50 +20,29 @@ const authOptions = {
       name: "Credentials",
       id: "credentials",
       credentials: {
-        email: { label: "Email", type: "email", placeholder: "test@example.com" },
+        username: { label: "Email", type: "email", placeholder: "test@example.com" },
         password: { label: "Password", type: "password", placeholder: "password" },
       },
       async authorize(credentials, req) {
-        const { email, password } = credentials;
+        const email = credentials?.email;
+        const password = credentials?.password;
 
-        try {
-          await mongoose.connect(process.env.MONGO_URL);
+        mongoose.connect(process.env.MONGO_URL);
+        const user = await User.findOne({ email });
+        const passwordOk = user && bcrypt.compareSync(password, user.password);
 
-          const user = await User.findOne({ email });
-          if (!user) {
-            throw new Error("User not found");
-          }
-
-          const passwordOk = await bcrypt.compare(password, user.password);
-          if (!passwordOk) {
-            throw new Error("Invalid password");
-          }
-
+        if (passwordOk) {
           return user;
-        } catch (error) {
-          console.error("Error during authentication:", error);
-          return null;
         }
+
+        return null;
       },
     }),
   ],
 };
 
-export const isAdmin = async (req) => {
-  const session = await getServerSession(authOptions, req);
-  const userEmail = session?.user?.email;
-
-  if (!userEmail) {
-    return false;
-  }
-
-  try {
-    const userInfo = await UserInfo.findOne({ email: userEmail });
-    return userInfo ? userInfo.admin : false;
-  } catch (error) {
-    console.error("Error while checking admin status:", error);
-    return false;
-  }
-};
-
-export default NextAuth(authOptions);
+// Removed the "isAdmin" function
+{
+export const handler = NextAuth(authOptions) as never;
+}
+export { handler as GET, handler as POST };
