@@ -1,4 +1,4 @@
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // Import authOptions only
+import { authOptions } from "../auth/[...nextauth]/authOptions"; // Import authOptions only
 import { Order } from "@/models/Order";
 import mongoose from "mongoose";
 import { getServerSession } from "next-auth";
