@@ -8,7 +8,7 @@ import Trash from "../components/icons/Trash";
 import AddressInputs from "../components/layout/AddressInputs";
 import { useProfile } from "../components/UseProfile";
 import OrderPopUp from "@/app/components/OrderPopup";
-import { isAdmin } from "../auth/[...nextauth]/utils";
+import { isAdmin } from "@/app/api/auth/[...nextauth]/utils";
 
 export default  function CartPage({isAdmin}){
      const {cartProducts,removeCartProduct} = useContext(CartContext);
