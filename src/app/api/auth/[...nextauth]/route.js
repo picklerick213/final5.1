@@ -63,4 +63,4 @@ export async function isAdmin(req) {
 
 // Default export for Next.js API route handler
 export default NextAuth(authOptions);
-export { handler as GET, handler as POST };
+
