@@ -4,7 +4,7 @@ import { User } from "@/models/User";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import { MongoDBAdapter } from "@/auth/mongodb-adapter";
+import { MongoDBAdapter } from "@/next-auth/mongodb-adapter";
 import clientPromise from "@/src/libs/mongoConnect";
 import UserInfo from "../../../../models/UserInfo"; // Import UserInfo once
 
