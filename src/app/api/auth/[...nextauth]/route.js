@@ -27,17 +27,17 @@ export const authOptions = {
         const email = credentials?.email;
         const password = credentials?.password;
 
-        await mongoose.connect(process.env.MONGO_URL);
-        const user = await User.findOne({ email });
+        mongoose.connect(process.env.MONGO_URL);
+        const user = await User.findOne({email});
         const passwordOk = user && bcrypt.compareSync(password, user.password);
 
         if (passwordOk) {
           return user;
         }
 
-        return null;
-      },
-    }),
+        return null
+      }
+    })
   ],
 };
 
@@ -54,6 +54,6 @@ export async function isAdmin() {
   return userInfo.admin;
 }
 
-export const handler = NextAuth(authOptions);
+const handler = NextAuth(authOptions);
 
-export { handler as GET, handler as POST };
+export { handler as GET, handler as POST }
