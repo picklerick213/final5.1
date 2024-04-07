@@ -1,19 +1,13 @@
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
 import NextAuth from "next-auth";
-import { Session } from "next-auth"; // Import Session from next-auth
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import { MongoDBAdapter } from "@/auth/mongodb-adapter"; // Adjusted import path
-import clientPromise from "@/src/libs/mongoConnect"; // Adjusted import path
-import UserInfo from "@/models/UserInfo"; // Adjusted import path
+import { MongoDBAdapter } from "@/auth/mongodb-adapter";
+import clientPromise from "@/src/libs/mongoConnect";
+import UserInfo from "@/models/UserInfo";
 
-interface Credentials {
-  email: string;
-  password: string;
-}
-
-export const authOptions: NextAuth.Options = {
+export const authOptions = {
   secret: process.env.SECRET,
   adapter: MongoDBAdapter(clientPromise),
   providers: [
@@ -21,14 +15,14 @@ export const authOptions: NextAuth.Options = {
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
-    CredentialsProvider<Credentials>({
+    CredentialsProvider({
       name: "Credentials",
       id: "credentials",
       credentials: {
-        email: { label: "Email", type: "email", placeholder: "test@example.com" }, // Corrected label to email
+        email: { label: "Email", type: "email", placeholder: "test@example.com" },
         password: { label: "Password", type: "password", placeholder: "password" },
       },
-      async authorize(credentials: Credentials, req: NextAuth.GetApiHandlerOptions): Promise<UserInfo | null> { // Changed return type to UserInfo | null
+      async authorize(credentials, req) {
         const email = credentials?.email;
         const password = credentials?.password;
 
@@ -37,7 +31,7 @@ export const authOptions: NextAuth.Options = {
         const passwordOk = user && bcrypt.compareSync(password, user.password);
 
         if (passwordOk) {
-          return user; // Return UserInfo instance
+          return user;
         }
 
         return null;
@@ -46,6 +40,6 @@ export const authOptions: NextAuth.Options = {
   ],
 };
 
-export const handler: NextAuth.GetApiHandler<Session> = NextAuth(authOptions);
+export const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
