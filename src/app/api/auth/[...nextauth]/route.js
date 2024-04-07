@@ -4,9 +4,9 @@ import { User } from "@/models/User";
 import NextAuth, { Session } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import { MongoDBAdapter } from "@auth/mongodb-adapter";
-import clientPromise from "@/libs/mongoConnect";
-import { UserInfo } from "@/models/UserInfo";
+import { MongoDBAdapter } from "@/auth/mongodb-adapter"; // Adjusted import path
+import clientPromise from "@/libs/mongoConnect"; // Adjusted import path
+import { UserInfo } from "@/models/UserInfo"; // Adjusted import path
 
 interface Credentials {
   email: string;
