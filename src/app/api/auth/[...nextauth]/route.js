@@ -1,12 +1,12 @@
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
-import { User } from "@/models/User";
-import NextAuth, { Session } from "next-auth";
+import NextAuth from "next-auth";
+import { Session } from "next-auth"; // Import Session from next-auth
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { MongoDBAdapter } from "@/auth/mongodb-adapter"; // Adjusted import path
 import clientPromise from "@/src/libs/mongoConnect"; // Adjusted import path
-import  UserInfo  from "@/models/UserInfo"; // Adjusted import path
+import UserInfo from "@/models/UserInfo"; // Adjusted import path
 
 interface Credentials {
   email: string;
@@ -25,10 +25,10 @@ export const authOptions: NextAuth.Options = {
       name: "Credentials",
       id: "credentials",
       credentials: {
-        username: { label: "Email", type: "email", placeholder: "test@example.com" },
+        email: { label: "Email", type: "email", placeholder: "test@example.com" }, // Corrected label to email
         password: { label: "Password", type: "password", placeholder: "password" },
       },
-      async authorize(credentials: Credentials, req: NextAuth.GetApiHandlerOptions): Promise<User | null> {
+      async authorize(credentials: Credentials, req: NextAuth.GetApiHandlerOptions): Promise<UserInfo | null> { // Changed return type to UserInfo | null
         const email = credentials?.email;
         const password = credentials?.password;
 
@@ -37,7 +37,7 @@ export const authOptions: NextAuth.Options = {
         const passwordOk = user && bcrypt.compareSync(password, user.password);
 
         if (passwordOk) {
-          return user;
+          return user; // Return UserInfo instance
         }
 
         return null;
