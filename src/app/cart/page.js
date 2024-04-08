@@ -10,7 +10,7 @@ import { useProfile } from "../components/UseProfile";
 import OrderPopUp from "@/app/components/OrderPopup";
 import { isAdmin } from "@/app/api/auth/[...nextauth]/utils";
 
-export default  function CartPage({isAdmin}){
+export default  function CartPage(){
      const {cartProducts,removeCartProduct} = useContext(CartContext);
      const [address, setAddress] = useState({});
      const {data:profileData} = useProfile();
